@@ -11,8 +11,8 @@ ENV GOPATH=/
 COPY ./ ./
 
 RUN go mod download
-RUN go build -o gateway ./gateway/cmd/main.go
+RUN go build -o gateway1 ./gateway/cmd/main.go
 
 #RUN chmod a+x ./pub
 
-CMD ["./gateway"]
+CMD ["./gateway1"]

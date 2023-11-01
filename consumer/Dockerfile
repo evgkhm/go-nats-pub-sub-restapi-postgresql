@@ -11,8 +11,8 @@ ENV GOPATH=/
 COPY ./ ./
 
 RUN go mod download
-RUN go build -o consumer ./consumer/cmd/main.go
+RUN go build -o consumer1 ./consumer/cmd/main.go
 
 #RUN chmod a+x ./sub
 
-CMD ["./consumer"]
+CMD ["./consumer1"]

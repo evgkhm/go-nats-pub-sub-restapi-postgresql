@@ -1,0 +1,73 @@
+version: '3.5'
+
+services:
+  postgres2:
+    container_name: postgres2
+    restart: always
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=users #postgres
+      - POSTGRES_SSLMODE=disable
+    image: postgres:15.0-alpine3.16
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  gateway:
+    container_name: gateway
+    build:
+      context: .
+      dockerfile: ./gateway/Dockerfile
+    restart: always
+    command: ./gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nats
+    environment:
+      - CONFIG_PATH=/go/gateway/internal/config/config.yaml
+    networks:
+      - nats
+    #volumes:
+    #  - ./:/app
+
+  consumer:
+    container_name: consumer
+    build:
+      context: .
+      dockerfile: ./consumer/Dockerfile
+    restart: always
+    command: ./consumer
+    #ports:
+      #- "8080:8080"
+    depends_on:
+      - postgres2
+      - nats
+    environment:
+      - CONFIG_PATH=/go/consumer/internal/config/config.yaml
+    networks:
+      - nats
+    #volumes:
+    #  - ./:/app
+
+  nats:
+    container_name: nats
+    image: nats-streaming:latest
+    networks:
+      - nats
+    restart: always
+    command:
+      - "-m"
+      - "8222"
+    #expose:
+    #  - "4222"
+    #  - "8222"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
+networks:
+  nats:
+    name: nats

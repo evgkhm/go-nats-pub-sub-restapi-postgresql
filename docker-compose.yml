@@ -15,13 +15,13 @@ services:
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  gateway:
-    container_name: gateway
+  gateway1:
+    container_name: gateway1
     build:
       context: .
       dockerfile: ./gateway/Dockerfile
     restart: always
-    command: ./gateway
+    command: ./gateway1
     ports:
       - "8080:8080"
     depends_on:
@@ -34,12 +34,12 @@ services:
     #  - ./:/app
 
   consumer:
-    container_name: consumer
+    container_name: consumer1
     build:
       context: .
       dockerfile: ./consumer/Dockerfile
     restart: always
-    command: ./consumer
+    command: ./consumer1
     #ports:
       #- "8080:8080"
     depends_on:

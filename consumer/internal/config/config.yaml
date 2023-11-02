@@ -14,7 +14,7 @@ postgres:
   ssl_mode: disable
 
 nats:
-  url: "nats://localhost:4222" #url: "localhost:4222" #"nats://nats:4222"
+  url: "nats://nats:4222" #url: "localhost:4222" #"nats://nats:4222"
   name: "EVENTS"
   #subjects: "events" # subjects: "events.>"
   subjects.topic: "events.users_info"

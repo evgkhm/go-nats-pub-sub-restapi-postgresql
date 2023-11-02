@@ -7,7 +7,6 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/transactions"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/usecase"
-	"golang.org/x/net/context"
 	"log"
 )
 
@@ -19,9 +18,9 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
+	//ctx, cancel := context.WithCancel(context.Background())
 	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	//defer cancel()
 
 	postgresDB, err := postgres.NewPostgresDB(postgres.Config)
 	if err != nil {
@@ -40,6 +39,6 @@ func main() {
 	}
 
 	natsSubscriber := nats.NewSubscriber(nc, js, useCases)
-	natsSubscriber.Run(ctx)
+	natsSubscriber.Run()
 
 }

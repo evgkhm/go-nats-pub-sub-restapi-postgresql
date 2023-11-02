@@ -37,15 +37,22 @@ func New(config *Conf) (*nats.Conn, jetstream.JetStream, error) {
 		return nil, nil, fmt.Errorf("nats - New - nats.Connect: %w", errConnect)
 	}
 	// create jetstream context from nats connection
-	//js, errJetStream := jetstream.New(nc)
-	//if errJetStream != nil {
-	//	return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
-	//}
+	js, errJetStream := jetstream.New(nc)
+	if errJetStream != nil {
+		return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
+	}
 
 	//_, errPublish := js.PublishAsync(config.Topic, []byte("NATS started"))
 	//if errPublish != nil {
 	//	return nil, nil, fmt.Errorf("nats - New - js.PublishAsync: %w", errPublish)
 	//}
-
-	return nc, nil, nil
+	//js, errJetStream := nc.JetStream()
+	//if errJetStream != nil {
+	//	return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
+	//}
+	//
+	//subscription, errSub := js.Subscribe(config.Topic, func(msg *nats.Msg) {
+	//
+	//})
+	return nc, js, nil
 }

@@ -17,9 +17,9 @@ type Subscriber struct {
 }
 
 type UserJetStream interface {
-	Run(ctx context.Context)
+	Run()
 	createUser(ctx context.Context, mqUser user.MqUser)
-	subscribe(ctx context.Context, wg *sync.WaitGroup)
+	subscribe(wg *sync.WaitGroup)
 	publishMessage(ctx context.Context, userDTO *user.User, message string) error
 	getBalanceUser(ctx context.Context, mqUser user.MqUser)
 	accrualBalanceUser(ctx context.Context, mqUser user.MqUser)
@@ -31,7 +31,7 @@ func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, useCase *usecase.UseCa
 	}
 }
 
-func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
+func (u *UserSubscribe) subscribe(wg *sync.WaitGroup) {
 	//wg := &sync.WaitGroup{}
 	//wg.Add(1)
 	u.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
@@ -42,6 +42,7 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 		}
 		log.Printf("Consumer  =>  Subject: %s  -  ID: %d  -  Balance: %f - Method: %s\n", msg.Subject, mqUser.ID, mqUser.Balance, mqUser.Method)
 
+		ctx := context.Background()
 		switch mqUser.Method {
 		case "Create user":
 			u.createUser(ctx, mqUser)
@@ -58,10 +59,10 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 
 }
 
-func (u *UserSubscribe) Run(ctx context.Context) {
+func (u *UserSubscribe) Run() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	go u.subscribe(ctx, wg)
+	go u.subscribe(wg)
 	wg.Wait()
 	runtime.Goexit()
 }

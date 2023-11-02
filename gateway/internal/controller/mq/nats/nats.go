@@ -42,10 +42,34 @@ func New(config *Conf) (*nats.Conn, jetstream.JetStream, error) {
 		return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
 	}
 
-	//_, errPublish := js.PublishAsync(config.Topic, []byte("NATS started"))
-	//if errPublish != nil {
-	//	return nil, nil, fmt.Errorf("nats - New - js.PublishAsync: %w", errPublish)
-	//}
+	//nc.JetStream(nats.PublishAsyncMaxPending(256), jetstream.Pub)
+	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	//defer cancel()
+	//
+	//stream, _ := js.CreateStream(ctx, jetstream.StreamConfig{
+	//	Name:     config.name,
+	//	Subjects: []string{config.Topic},
+	//})
+	//
+	//cons, _ := stream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
+	//	Name: "consumer",
+	//})
+	////_, errPublish := js.PublishAsync(config.Topic, []byte("NATS started"))
+	////if errPublish != nil {
+	////	return nil, nil, fmt.Errorf("nats - New - js.PublishAsync: %w", errPublish)
+	////}
+	//
+	//wg := sync.WaitGroup{}
+	//wg.Add(3)
+	//
+	//cc, _ := cons.Consume(func(msg jetstream.Msg) {
+	//	msg.Ack()
+	//	fmt.Println("received msg on", msg.Subject())
+	//	wg.Done()
+	//})
+	//wg.Wait()
+	//
+	//cc.Stop()
 
 	return nc, js, nil
 }

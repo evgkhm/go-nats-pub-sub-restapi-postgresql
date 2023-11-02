@@ -26,7 +26,7 @@ func PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, me
 
 	_, err = js.PublishAsync(topic, b)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err) //TODO:logger
 	}
 
 	return nil

@@ -43,7 +43,6 @@ func (r Repo) CreateUser(ctx context.Context, tx *sqlx.Tx, user *user.User) erro
 func (r Repo) GetBalance(ctx context.Context, id string, tx *sqlx.Tx) (float32, error) {
 	var balance float32
 	query := `SELECT balance FROM user_info WHERE id=$1 `
-	//err := tx.GetContext(ctx, &balance, query, user.ID)
 	err := tx.GetContext(ctx, &balance, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

@@ -15,17 +15,15 @@ var (
 var Config *Conf
 
 type Conf struct {
-	url  string
-	name string
-	//subjects string
+	url   string
+	name  string
 	Topic string
 }
 
 func (c Conf) Init() {
 	Config = &Conf{
-		url:  viper.GetString("nats.url"),
-		name: viper.GetString("nats.name"),
-		//subjects: viper.GetString("nats.subjects"),
+		url:   viper.GetString("nats.url"),
+		name:  viper.GetString("nats.name"),
 		Topic: viper.GetString("nats.subjects.topic"),
 	}
 }
@@ -41,35 +39,6 @@ func New(config *Conf) (*nats.Conn, jetstream.JetStream, error) {
 	if errJetStream != nil {
 		return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
 	}
-
-	//nc.JetStream(nats.PublishAsyncMaxPending(256), jetstream.Pub)
-	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	//defer cancel()
-	//
-	//stream, _ := js.CreateStream(ctx, jetstream.StreamConfig{
-	//	Name:     config.name,
-	//	Subjects: []string{config.Topic},
-	//})
-	//
-	//cons, _ := stream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
-	//	Name: "consumer",
-	//})
-	////_, errPublish := js.PublishAsync(config.Topic, []byte("NATS started"))
-	////if errPublish != nil {
-	////	return nil, nil, fmt.Errorf("nats - New - js.PublishAsync: %w", errPublish)
-	////}
-	//
-	//wg := sync.WaitGroup{}
-	//wg.Add(3)
-	//
-	//cc, _ := cons.Consume(func(msg jetstream.Msg) {
-	//	msg.Ack()
-	//	fmt.Println("received msg on", msg.Subject())
-	//	wg.Done()
-	//})
-	//wg.Wait()
-	//
-	//cc.Stop()
 
 	return nc, js, nil
 }

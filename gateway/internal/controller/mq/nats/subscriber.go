@@ -19,8 +19,6 @@ func NewSubscriber(nc *nats.Conn) *Subscriber {
 }
 
 func (s *Subscriber) Subscribe(ctx context.Context) {
-	//wg := &sync.WaitGroup{}
-	//wg.Add(1)
 	s.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
 		var mqUser user.MqUser
 		err := json.Unmarshal(msg.Data, &mqUser)
@@ -28,11 +26,7 @@ func (s *Subscriber) Subscribe(ctx context.Context) {
 			log.Fatal(err)
 		}
 		log.Printf("Consumer  =>  Subject: %s  -  ID: %d  -  Balance: %f - Method: %s\n", msg.Subject, mqUser.ID, mqUser.Balance, mqUser.Method)
-		//wg.Done()
 	})
-	//s.nc.Flush()
-	//wg.Wait()
-
 }
 
 func (s *Subscriber) Run(ctx context.Context) {

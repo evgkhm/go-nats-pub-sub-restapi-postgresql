@@ -106,8 +106,7 @@ func (u UserUseCase) GetBalance(ctx context.Context, id string) (user.User, erro
 	}
 
 	balance, err := u.userRepo.GetBalance(ctx, id, tx)
-	//dto.Balance = balance
-	//dto.Balance, err = u.userRepo.GetBalance(ctx, id, tx, dto)
+
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {

@@ -15,17 +15,15 @@ var (
 var Config *Conf
 
 type Conf struct {
-	url  string
-	name string
-	//subjects string
+	url   string
+	name  string
 	Topic string
 }
 
 func (c Conf) Init() {
 	Config = &Conf{
-		url:  viper.GetString("nats.url"),
-		name: viper.GetString("nats.name"),
-		//subjects: viper.GetString("nats.subjects"),
+		url:   viper.GetString("nats.url"),
+		name:  viper.GetString("nats.name"),
 		Topic: viper.GetString("nats.subjects.topic"),
 	}
 }
@@ -42,17 +40,5 @@ func New(config *Conf) (*nats.Conn, jetstream.JetStream, error) {
 		return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
 	}
 
-	//_, errPublish := js.PublishAsync(config.Topic, []byte("NATS started"))
-	//if errPublish != nil {
-	//	return nil, nil, fmt.Errorf("nats - New - js.PublishAsync: %w", errPublish)
-	//}
-	//js, errJetStream := nc.JetStream()
-	//if errJetStream != nil {
-	//	return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
-	//}
-	//
-	//subscription, errSub := js.Subscribe(config.Topic, func(msg *nats.Msg) {
-	//
-	//})
 	return nc, js, nil
 }

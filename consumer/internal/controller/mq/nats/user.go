@@ -9,12 +9,6 @@ import (
 	"strconv"
 )
 
-//type User interface {
-//	CreateUser()
-//	GetBalance()
-//	AccrualBalanceUser()
-//}
-
 type UserSubscribe struct {
 	nc      *nats.Conn
 	js      jetstream.JetStream
@@ -38,7 +32,6 @@ func (u *UserSubscribe) createUser(ctx context.Context, mqUser user.MqUser) { //
 	err := u.useCase.CreateUser(ctx, userDTO)
 	if err != nil {
 		u.publishMessage(ctx, userDTO, err.Error())
-		//nats.PublishMessage(h.js, userDTO, nats2.Config.Topic, ErrInternalServer.Error())
 		return
 	}
 

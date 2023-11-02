@@ -32,8 +32,6 @@ func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, useCase *usecase.UseCa
 }
 
 func (u *UserSubscribe) subscribe(wg *sync.WaitGroup) {
-	//wg := &sync.WaitGroup{}
-	//wg.Add(1)
 	u.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
 		var mqUser user.MqUser
 		err := json.Unmarshal(msg.Data, &mqUser)
@@ -51,12 +49,8 @@ func (u *UserSubscribe) subscribe(wg *sync.WaitGroup) {
 		case "Accrual user balance":
 			u.accrualBalanceUser(ctx, mqUser)
 		}
-		//wg.Done()
 	})
 	wg.Done()
-	//s.nc.Flush()
-	//wg.Wait()
-
 }
 
 func (u *UserSubscribe) Run() {

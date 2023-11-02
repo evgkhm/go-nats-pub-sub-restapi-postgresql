@@ -18,10 +18,7 @@ func init() {
 }
 
 func main() {
-	//ctx, cancel := context.WithCancel(context.Background())
-	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	//defer cancel()
-
+	//TODO: add logger
 	postgresDB, err := postgres.NewPostgresDB(postgres.Config)
 	if err != nil {
 		log.Fatal(fmt.Errorf("main - postgres.NewPostgresDB: %w", err))
@@ -40,5 +37,4 @@ func main() {
 
 	natsSubscriber := nats.NewSubscriber(nc, js, useCases)
 	natsSubscriber.Run()
-
 }

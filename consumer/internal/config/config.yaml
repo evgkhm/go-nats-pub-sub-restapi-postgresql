@@ -1,10 +1,4 @@
 ---
-#server:
-#  port: 8080
-#  host_port: localhost:8080
-#  #log_path: logrus.log
-#  duration: 10000000000 #10 seconds
-
 postgres:
   host: host.docker.internal #localhost
   port: 5436
@@ -14,10 +8,9 @@ postgres:
   ssl_mode: disable
 
 nats:
-  url: "nats://nats:4222" #url: "localhost:4222" #"nats://nats:4222"
+  #url: "localhost:4222" #for local
+  url: "nats://nats:4222" #for docker
   name: "EVENTS"
   #subjects: "events" # subjects: "events.>"
   subjects.topic: "events.users_info"
-  #ClusterID: microservice
-  #ClientID: test-nats-app
 ...

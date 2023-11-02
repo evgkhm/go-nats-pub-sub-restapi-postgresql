@@ -47,7 +47,7 @@ func (h Handler) getBalanceUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, userDTO.Balance)
+	c.JSON(http.StatusOK, "Ok")
 }
 
 func (h Handler) accrualBalanceUser(c *gin.Context) {

@@ -9,7 +9,6 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/usecase"
 	"golang.org/x/net/context"
 	"log"
-	"time"
 )
 
 func init() {
@@ -20,7 +19,8 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithCancel(context.Background())
+	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	postgresDB, err := postgres.NewPostgresDB(postgres.Config)
@@ -42,11 +42,4 @@ func main() {
 	natsSubscriber := nats.NewSubscriber(nc, js, useCases)
 	natsSubscriber.Run(ctx)
 
-	//handlers := http2.New(useCases, js)
-	//r := handlers.InitRoutes()
-	//
-	//err = r.Run(":" + http2.HTTP.Port)
-	//if err != nil {
-	//	log.Fatal(fmt.Errorf("main - r.Run: %w", err))
-	//}
 }

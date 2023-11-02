@@ -1,8 +1,8 @@
 version: '3.5'
 
 services:
-  postgres2:
-    container_name: postgres2
+  postgres:
+    container_name: postgres
     restart: always
     ports:
       - "5436:5432"
@@ -43,7 +43,7 @@ services:
     #ports:
       #- "8080:8080"
     depends_on:
-      - postgres2
+      - postgres
       - nats
     environment:
       - CONFIG_PATH=/go/consumer/internal/config/config.yaml

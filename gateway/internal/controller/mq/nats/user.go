@@ -2,13 +2,12 @@ package nats
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/pkg/errors"
 	user "go-nats-pub-sub-restapi-postgresql/gateway/internal/entity"
 	"golang.org/x/net/context"
-	"log"
+	"log/slog"
 	"sync"
 )
 
@@ -17,14 +16,16 @@ var (
 )
 
 type UserSubscribe struct {
-	nc *nats.Conn
-	js jetstream.JetStream
+	nc     *nats.Conn
+	js     jetstream.JetStream
+	logger *slog.Logger
 }
 
-func NewUserSubscriber(nc *nats.Conn, js jetstream.JetStream) *UserSubscribe {
+func NewUserSubscriber(nc *nats.Conn, js jetstream.JetStream, logger *slog.Logger) *UserSubscribe {
 	return &UserSubscribe{
-		nc: nc,
-		js: js,
+		nc:     nc,
+		js:     js,
+		logger: logger,
 	}
 }
 
@@ -38,9 +39,9 @@ type UserJetStream interface {
 	PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, message string) error
 }
 
-func NewSubscriber(nc *nats.Conn, js jetstream.JetStream) *Subscriber {
+func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, logger *slog.Logger) *Subscriber {
 	return &Subscriber{
-		UserJetStream: NewUserSubscriber(nc, js),
+		UserJetStream: NewUserSubscriber(nc, js, logger),
 	}
 }
 
@@ -49,16 +50,19 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 		var mqUser user.MqUser
 		err := json.Unmarshal(msg.Data, &mqUser)
 		if err != nil {
-			log.Fatal(err)
+			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)
 		}
-		log.Printf("Consumer  =>  Subject: %s  -  ID: %d  -  Balance: %f - Method: %s\n", msg.Subject, mqUser.ID, mqUser.Balance, mqUser.Method)
+		u.logger.Info("Gateway", "=>Subject", msg.Subject, "ID", mqUser.ID, "Balance", mqUser.Balance, "Method", mqUser.Method)
+
+		//log.Printf("Consumer  =>  Subject: %s  -  ID: %d  -  Balance: %f - Method: %s\n", msg.Subject, mqUser.ID, mqUser.Balance, mqUser.Method) //!!!!!!!!!!!!!!!
 	})
 	wg.Done()
 }
 
 func (u *UserSubscribe) PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, message string) error {
 	if js == nil {
-		return fmt.Errorf("nats - PublishMessage: %w", ErrJsNil)
+		u.logger.Error("nats - UserSubscribe - PublishMessage:", "err", ErrJsNil)
+		return ErrJsNil
 	}
 
 	mqData := user.MqUser{
@@ -67,10 +71,14 @@ func (u *UserSubscribe) PublishMessage(js jetstream.JetStream, userDTO *user.Use
 		Method:  message,
 	}
 	b, err := json.Marshal(mqData)
+	if err != nil {
+		u.logger.Error("nats - UserSubscribe - PublishMessage - json.Marshal:", "err", err)
+		return err
+	}
 
 	_, err = js.PublishAsync(topic, b)
 	if err != nil {
-		fmt.Println(err) //TODO:logger
+		u.logger.Error("nats - UserSubscribe - PublishMessage - js.PublishAsync:", "err", err)
 	}
 
 	return nil

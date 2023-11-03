@@ -5,8 +5,10 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/config"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/http"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/mq/nats"
+	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/logging"
 	"golang.org/x/net/context"
 	"log"
+	"log/slog"
 	"time"
 )
 
@@ -18,16 +20,20 @@ func init() {
 }
 
 func main() {
-	//TODO: add logger
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	nc, js, err := nats.New(nats.Config)
-	if err != nil {
-		log.Fatal(fmt.Errorf("main - nats.New: %w", err))
-	}
+	logger := logging.Logger()
+	slog.SetDefault(logger)
 
-	natsSubscriber := nats.NewSubscriber(nc, js)
+	nc, js, err := nats.New(nats.Config, logger)
+	if err != nil {
+		//logger.Error("main - nats.New:", "err", err)
+		return
+	}
+	logger.Info("nats created and connected")
+
+	natsSubscriber := nats.NewSubscriber(nc, js, logger)
 	natsSubscriber.Run(ctx)
 
 	handlers := http.New(js, natsSubscriber)

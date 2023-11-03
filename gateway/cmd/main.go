@@ -27,10 +27,10 @@ func main() {
 		log.Fatal(fmt.Errorf("main - nats.New: %w", err))
 	}
 
-	natsSubscriber := nats.NewSubscriber(nc)
+	natsSubscriber := nats.NewSubscriber(nc, js)
 	natsSubscriber.Run(ctx)
 
-	handlers := http.New(js)
+	handlers := http.New(js, natsSubscriber)
 	r := handlers.InitRoutes()
 
 	err = r.Run(":" + http.HTTP.Port)

@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/nats-io/nats.go/jetstream"
+	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/mq/nats"
 )
 
 type Creating interface {
@@ -10,7 +11,8 @@ type Creating interface {
 }
 
 type Handler struct {
-	js jetstream.JetStream
+	js             jetstream.JetStream
+	natsSubscriber *nats.Subscriber
 }
 
 func (h Handler) InitRoutes() *gin.Engine {
@@ -23,8 +25,9 @@ func (h Handler) InitRoutes() *gin.Engine {
 	return router
 }
 
-func New(js jetstream.JetStream) *Handler {
+func New(js jetstream.JetStream, natsSubscriber *nats.Subscriber) *Handler {
 	return &Handler{
-		js: js,
+		js:             js,
+		natsSubscriber: natsSubscriber,
 	}
 }

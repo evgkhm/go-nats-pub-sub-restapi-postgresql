@@ -21,8 +21,7 @@ func (h Handler) createUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrBadRequest.Error())
 		return
 	}
-
-	err = nats.PublishMessage(h.js, userDTO, nats.Config.Topic, "Create user")
+	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Create user")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
@@ -41,7 +40,7 @@ func (h Handler) getBalanceUserByID(c *gin.Context) {
 		return
 	}
 
-	err = nats.PublishMessage(h.js, &userDTO, nats.Config.Topic, "Get user balance")
+	err = h.natsSubscriber.PublishMessage(h.js, &userDTO, nats.Config.Topic, "Get user balance")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
@@ -58,7 +57,7 @@ func (h Handler) accrualBalanceUser(c *gin.Context) {
 		return
 	}
 
-	err = nats.PublishMessage(h.js, userDTO, nats.Config.Topic, "Accrual user balance")
+	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Accrual user balance")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return

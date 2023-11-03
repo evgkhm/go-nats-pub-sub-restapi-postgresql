@@ -34,7 +34,7 @@ type Subscriber struct {
 
 type UserJetStream interface {
 	Run(ctx context.Context)
-	Subscribe(ctx context.Context, wg *sync.WaitGroup)
+	subscribe(ctx context.Context, wg *sync.WaitGroup)
 	PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, message string) error
 }
 
@@ -44,7 +44,7 @@ func NewSubscriber(nc *nats.Conn, js jetstream.JetStream) *Subscriber {
 	}
 }
 
-func (u *UserSubscribe) Subscribe(ctx context.Context, wg *sync.WaitGroup) {
+func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 	u.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
 		var mqUser user.MqUser
 		err := json.Unmarshal(msg.Data, &mqUser)
@@ -79,6 +79,6 @@ func (u *UserSubscribe) PublishMessage(js jetstream.JetStream, userDTO *user.Use
 func (u *UserSubscribe) Run(ctx context.Context) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	go u.Subscribe(ctx, wg)
+	go u.subscribe(ctx, wg)
 	wg.Wait()
 }

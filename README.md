@@ -19,3 +19,6 @@
 | get_balance_user/:id  |  GET   |     Get balance user |
 | create_user           |  POST  |          Create user |
 | accrual_balance_user  |  POST  | Accrual balance user |
+
+# TODO
+Add vendor, tests, linter, metrics

@@ -53,8 +53,6 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)
 		}
 		u.logger.Info("Gateway", "=>Subject", msg.Subject, "ID", mqUser.ID, "Balance", mqUser.Balance, "Method", mqUser.Method)
-
-		//log.Printf("Consumer  =>  Subject: %s  -  ID: %d  -  Balance: %f - Method: %s\n", msg.Subject, mqUser.ID, mqUser.Balance, mqUser.Method) //!!!!!!!!!!!!!!!
 	})
 	wg.Done()
 }

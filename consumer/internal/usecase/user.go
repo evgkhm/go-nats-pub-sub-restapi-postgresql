@@ -7,6 +7,7 @@ import (
 	user "go-nats-pub-sub-restapi-postgresql/consumer/internal/entity"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/transactions"
+	"log/slog"
 	"strconv"
 )
 
@@ -17,12 +18,14 @@ var (
 type UserUseCase struct {
 	userRepo  postgres.UserRepository
 	txService *transactions.TransactionServiceImpl
+	logger    *slog.Logger
 }
 
-func NewUserUseCase(userRepo postgres.UserRepository, txService *transactions.TransactionServiceImpl) *UserUseCase {
+func NewUserUseCase(userRepo postgres.UserRepository, txService *transactions.TransactionServiceImpl, logger *slog.Logger) *UserUseCase {
 	return &UserUseCase{
 		userRepo:  userRepo,
 		txService: txService,
+		logger:    logger,
 	}
 }
 
@@ -31,18 +34,21 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.txService.NewTransaction - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.NewTransaction - u.txService.Rollback", "err", err)
 		}
-		return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.txService.NewTransaction: %w", err)
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.NewTransaction", "err", err)
+		return err
 	}
 
 	// Проверка на отрицательный баланс
 	if userDTO.Balance < 0 {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
+			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback", "err", err)
 			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback: %w", err)
 		}
-		return fmt.Errorf("usecase - UseCase - UserBalanceAccrual: %w", ErrUserAccrualNegativeBalance)
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual", "err", err)
+		return err
 	}
 
 	id := userDTO.ID
@@ -51,9 +57,10 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.repo.GetBalance - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.repo.GetBalance - u.txService.Rollback", "err", err)
 		}
-		return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.repo.GetBalance: %w", err)
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.repo.GetBalance", "err", err)
+		return err
 	}
 
 	// Начислить новый баланс
@@ -64,9 +71,10 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.repo.UserBalanceAccrual - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.repo.UserBalanceAccrual - u.txService.Rollback", "err", err)
+			return err
 		}
-		return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.repo.UserBalanceAccrual: %w", err)
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.repo.UserBalanceAccrual", "err", err)
 	}
 
 	return u.txService.Commit(tx)
@@ -77,18 +85,22 @@ func (u UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error {
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return fmt.Errorf("usecase - UseCase - CreateUser - u.txService.NewTransaction - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - CreateUser - u.txService.NewTransaction - u.txService.Rollback", "err", err)
+			return err
 		}
-		return fmt.Errorf("usecase - UseCase - CreateUser - u.txService.NewTransaction: %w", err)
+		u.logger.Error("usecase - UseCase - CreateUser - u.txService.NewTransaction", "err", err)
+		return err
 	}
 
 	err = u.userRepo.CreateUser(ctx, tx, userDTO)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return fmt.Errorf("usecase - UseCase - CreateUser - u.repo.CreateUser - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - CreateUser - u.repo.CreateUser - u.txService.Rollback", "err", err)
+			return err
 		}
-		return fmt.Errorf("usecase - UseCase - CreateUser - u.txService.CreateUser: %w", err)
+		u.logger.Error("usecase - UseCase - CreateUser - u.repo.CreateUser", "err", err)
+		return err
 	}
 
 	return u.txService.Commit(tx)
@@ -100,9 +112,11 @@ func (u UserUseCase) GetBalance(ctx context.Context, id string) (user.User, erro
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return user.User{}, fmt.Errorf("usecase - UseCase - GetBalance - u.txService.NewTransaction - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - GetBalance - u.txService.NewTransaction - u.txService.Rollback", "err", err)
+			return user.User{}, err
 		}
-		return user.User{}, fmt.Errorf("usecase - UseCase - GetBalance - u.txService.NewTransaction: %w", err)
+		u.logger.Error("usecase - UseCase - GetBalance - u.txService.NewTransaction", "err", err)
+		return user.User{}, err
 	}
 
 	balance, err := u.userRepo.GetBalance(ctx, id, tx)
@@ -110,9 +124,11 @@ func (u UserUseCase) GetBalance(ctx context.Context, id string) (user.User, erro
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
-			return user.User{}, fmt.Errorf("usecase - UseCase - GetBalance - u.repo.GetBalance - u.txService.Rollback: %w", err)
+			u.logger.Error("usecase - UseCase - GetBalance - u.repo.GetBalance - u.txService.Rollback", "err", err)
+			return user.User{}, err
 		}
-		return user.User{}, fmt.Errorf("usecase - UseCase - GetBalance - u.txService.GetBalance: %w", err)
+		u.logger.Error("usecase - UseCase - GetBalance - u.repo.GetBalance", "err", err)
+		return user.User{}, err
 	}
 
 	userDTO.Balance = balance

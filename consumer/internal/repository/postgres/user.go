@@ -33,7 +33,7 @@ func (r Repo) CreateUser(ctx context.Context, tx *sqlx.Tx, user *user.User) erro
 	err := row.Scan(&id)
 	switch {
 	case errors.As(err, &duplicateEntryError):
-		return ErrUserAlreadyExist // return fmt.Errorf("postgres - UsersRepositoryImpl - CreateUser - tx.QueryRowxContext - row.Scan: %w", ErrUserAlreadyExist)
+		return ErrUserAlreadyExist
 	case err != nil:
 		return fmt.Errorf("postgres - UsersRepositoryImpl - CreateUser - tx.QueryRowxContext - row.Scan: %w", err)
 	}

@@ -5,6 +5,7 @@ import (
 	user "go-nats-pub-sub-restapi-postgresql/consumer/internal/entity"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/transactions"
+	"log/slog"
 )
 
 type UseCase struct {
@@ -17,8 +18,8 @@ type User interface {
 	AccrualBalanceUser(ctx context.Context, userDTO *user.User) error
 }
 
-func New(repo *postgres.Repository, txService *transactions.TransactionServiceImpl) *UseCase {
+func New(repo *postgres.Repository, txService *transactions.TransactionServiceImpl, logger *slog.Logger) *UseCase {
 	return &UseCase{
-		User: NewUserUseCase(repo.UserRepository, txService),
+		User: NewUserUseCase(repo.UserRepository, txService, logger),
 	}
 }

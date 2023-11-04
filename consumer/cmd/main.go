@@ -7,7 +7,9 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/transactions"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/usecase"
+	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/logging"
 	"log"
+	"log/slog"
 )
 
 func init() {
@@ -18,23 +20,25 @@ func init() {
 }
 
 func main() {
-	//TODO: add logger
-	postgresDB, err := postgres.NewPostgresDB(postgres.Config)
+	logger := logging.Logger()
+	slog.SetDefault(logger)
+
+	postgresDB, err := postgres.NewPostgresDB(postgres.Config, logger)
 	if err != nil {
-		log.Fatal(fmt.Errorf("main - postgres.NewPostgresDB: %w", err))
+		return
 	}
 
 	postgresRepository := postgres.New(postgresDB)
 
 	txService := transactions.New(postgresDB)
 
-	useCases := usecase.New(postgresRepository, txService)
+	useCases := usecase.New(postgresRepository, txService, logger)
 
-	nc, js, err := nats.New(nats.Config)
+	nc, js, err := nats.New(nats.Config, logger)
 	if err != nil {
 		log.Fatal(fmt.Errorf("main - nats.New: %w", err))
 	}
 
-	natsSubscriber := nats.NewSubscriber(nc, js, useCases)
+	natsSubscriber := nats.NewSubscriber(nc, js, useCases, logger)
 	natsSubscriber.Run()
 }

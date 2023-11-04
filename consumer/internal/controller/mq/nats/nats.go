@@ -1,11 +1,11 @@
 package nats
 
 import (
-	"fmt"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"log/slog"
 )
 
 var (
@@ -28,16 +28,17 @@ func (c Conf) Init() {
 	}
 }
 
-func New(config *Conf) (*nats.Conn, jetstream.JetStream, error) {
-	// connect to nats server
-	nc, errConnect := nats.Connect(config.url) //config.url
+func New(config *Conf, logger *slog.Logger) (*nats.Conn, jetstream.JetStream, error) {
+	nc, errConnect := nats.Connect(config.url)
 	if errConnect != nil {
-		return nil, nil, fmt.Errorf("nats - New - nats.Connect: %w", errConnect)
+		logger.Error("nats - New - nats.Connect:", "err", errConnect)
+		return nil, nil, errConnect
 	}
-	// create jetstream context from nats connection
+
 	js, errJetStream := jetstream.New(nc)
 	if errJetStream != nil {
-		return nil, nil, fmt.Errorf("nats - New - jetstream.New: %w", errJetStream)
+		logger.Error("nats - New - jetstream.New:", "err", errJetStream)
+		return nil, nil, errJetStream
 	}
 
 	return nc, js, nil

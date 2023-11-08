@@ -47,8 +47,8 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback", "err", err)
 			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback: %w", err)
 		}
-		u.logger.Error("usecase - UseCase - UserBalanceAccrual", "err", err)
-		return err
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual", "err", ErrUserAccrualNegativeBalance)
+		return ErrUserAccrualNegativeBalance
 	}
 
 	id := userDTO.ID

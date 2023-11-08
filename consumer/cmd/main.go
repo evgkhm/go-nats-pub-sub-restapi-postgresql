@@ -9,7 +9,6 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/usecase"
 	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/logging"
 	"log"
-	"log/slog"
 )
 
 func init() {
@@ -21,7 +20,8 @@ func init() {
 
 func main() {
 	logger := logging.Logger()
-	slog.SetDefault(logger)
+
+	logger.Info("Config", "postgres", postgres.Config, "nats", nats.Config)
 
 	postgresDB, err := postgres.NewPostgresDB(postgres.Config, logger)
 	if err != nil {

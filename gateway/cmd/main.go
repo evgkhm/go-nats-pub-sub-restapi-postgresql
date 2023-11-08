@@ -8,7 +8,6 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/logging"
 	"golang.org/x/net/context"
 	"log"
-	"log/slog"
 	"time"
 )
 
@@ -24,7 +23,8 @@ func main() {
 	defer cancel()
 
 	logger := logging.Logger()
-	slog.SetDefault(logger)
+
+	logger.Info("Config", "http", http.HTTP, "nats", nats.Config)
 
 	nc, js, err := nats.New(nats.Config, logger)
 	if err != nil {

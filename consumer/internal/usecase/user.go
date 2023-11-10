@@ -17,11 +17,11 @@ var (
 
 type UserUseCase struct {
 	userRepo  postgres.UserRepository
-	txService *transactions.TransactionServiceImpl
+	txService transactions.Transactor
 	logger    *slog.Logger
 }
 
-func NewUserUseCase(userRepo postgres.UserRepository, txService *transactions.TransactionServiceImpl, logger *slog.Logger) *UserUseCase {
+func NewUserUseCase(userRepo postgres.UserRepository, txService transactions.Transactor, logger *slog.Logger) *UserUseCase {
 	return &UserUseCase{
 		userRepo:  userRepo,
 		txService: txService,
@@ -29,7 +29,7 @@ func NewUserUseCase(userRepo postgres.UserRepository, txService *transactions.Tr
 	}
 }
 
-func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User) error {
+func (u *UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User) error {
 	tx, err := u.txService.NewTransaction()
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
@@ -41,7 +41,8 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	}
 
 	// Проверка на отрицательный баланс
-	if userDTO.Balance < 0 {
+	errNegBlnc := u.CheckNegativeBalance(ctx, userDTO)
+	if errNegBlnc != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
 			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback", "err", err)
@@ -64,8 +65,15 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	}
 
 	// Начислить новый баланс
-	newBalance := userDTO.Balance + currBalance
-	userDTO.Balance = newBalance
+	userDTO.Balance = u.CalcNewBalance(ctx, userDTO, currBalance)
+	if err != nil {
+		errRollback := u.txService.Rollback(tx)
+		if errRollback != nil {
+			u.logger.Error("usecase - UseCase - UserBalanceAccrual - calcNewBalance - u.txService.Rollback", "err", err)
+		}
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual - calcNewBalance", "err", err)
+		return err
+	}
 
 	err = u.userRepo.UserBalanceAccrual(ctx, tx, userDTO)
 	if err != nil {
@@ -80,7 +88,12 @@ func (u UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User)
 	return u.txService.Commit(tx)
 }
 
-func (u UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error {
+func (u *UserUseCase) CalcNewBalance(ctx context.Context, userDTO *user.User, balance float32) float32 {
+	newBalance := userDTO.Balance + balance
+	return newBalance
+}
+
+func (u *UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error {
 	tx, err := u.txService.NewTransaction()
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
@@ -106,7 +119,7 @@ func (u UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error {
 	return u.txService.Commit(tx)
 }
 
-func (u UserUseCase) GetBalance(ctx context.Context, id string) (user.User, error) {
+func (u *UserUseCase) GetBalance(ctx context.Context, id string) (user.User, error) {
 	var userDTO user.User
 	tx, err := u.txService.NewTransaction()
 	if err != nil {
@@ -137,4 +150,12 @@ func (u UserUseCase) GetBalance(ctx context.Context, id string) (user.User, erro
 	u.txService.Commit(tx)
 
 	return userDTO, nil
+}
+
+func (u *UserUseCase) CheckNegativeBalance(ctx context.Context, userDTO *user.User) error {
+	if userDTO.Balance < 0 {
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual", ErrUserAccrualNegativeBalance)
+		return ErrUserAccrualNegativeBalance
+	}
+	return nil
 }

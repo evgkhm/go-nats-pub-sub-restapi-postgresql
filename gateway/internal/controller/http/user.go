@@ -19,13 +19,13 @@ func (h Handler) createUser(c *gin.Context) {
 	var userDTO *user.User
 	err := c.BindJSON(&userDTO)
 	if err != nil {
-		h.logger.Error("Error while bind userDTO to JSON", ErrBadRequest.Error())
+		h.logger.Error("Error while bind userDTO to JSON", "err", ErrBadRequest)
 		c.JSON(http.StatusBadRequest, ErrBadRequest.Error())
 		return
 	}
 	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Create user")
 	if err != nil {
-		h.logger.Error("Error while publish message to nats", ErrInternalServer.Error())
+		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
 	}
@@ -37,21 +37,21 @@ func (h Handler) getBalanceUserByID(c *gin.Context) {
 	var err error
 	id := c.Param("id")
 	if id == "" {
-		h.logger.Error("Error while parse id", ErrEmptyCodeParam.Error())
+		h.logger.Error("Error while parse id", "err", ErrEmptyCodeParam)
 		c.JSON(http.StatusBadRequest, ErrEmptyCodeParam.Error())
 	}
 
 	var userDTO user.User
 	userDTO.ID, err = strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		h.logger.Error("Error while parse userDTO.ID", ErrInternalServer.Error())
+		h.logger.Error("Error while parse userDTO.ID", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
 	}
 
 	err = h.natsSubscriber.PublishMessage(h.js, &userDTO, nats.Config.Topic, "Get user balance")
 	if err != nil {
-		h.logger.Error("Error while publish message to nats", ErrInternalServer.Error())
+		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
 	}
@@ -63,14 +63,14 @@ func (h Handler) accrualBalanceUser(c *gin.Context) {
 	var userDTO *user.User
 	err := c.BindJSON(&userDTO)
 	if err != nil {
-		h.logger.Error("Error while bind userDTO to JSON", ErrBadRequest.Error())
+		h.logger.Error("Error while bind userDTO to JSON", "err", ErrBadRequest)
 		c.JSON(http.StatusBadRequest, "Bad request")
 		return
 	}
 
 	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Accrual user balance")
 	if err != nil {
-		h.logger.Error("Error while publish message to nats", ErrInternalServer.Error())
+		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
 		return
 	}

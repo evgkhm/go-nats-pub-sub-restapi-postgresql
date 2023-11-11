@@ -52,7 +52,11 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 		if err != nil {
 			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)
 		}
-		u.logger.Info("Gateway", "=>Subject", msg.Subject, "ID", mqUser.ID, "Balance", mqUser.Balance, "Method", mqUser.Method)
+		u.logger.Info("Consumer",
+			slog.String("Subject", msg.Subject),
+			slog.Uint64("ID", mqUser.ID),
+			slog.Float64("Balance", float64(mqUser.Balance)),
+			slog.String("Method", mqUser.Method))
 	})
 	wg.Done()
 }

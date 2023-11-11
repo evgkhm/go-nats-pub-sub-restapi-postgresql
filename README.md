@@ -7,6 +7,7 @@
 + slog
 + Docker
 + NATS
++ mockery
 
 # Getting Started
 1. `git clone https://github.com/evgkhm/go-nats-pub-sub-restapi-postgresql`
@@ -21,4 +22,4 @@
 | accrual_balance_user  |  POST  | Accrual balance user |
 
 # TODO
-Add tests, linter, metrics
+Add tests, linter, metrics, graceful shutdown

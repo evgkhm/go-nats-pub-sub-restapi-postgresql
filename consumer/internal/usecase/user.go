@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
 	user "go-nats-pub-sub-restapi-postgresql/consumer/internal/entity"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
@@ -46,7 +45,6 @@ func (u *UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
 			u.logger.Error("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback", "err", err)
-			return fmt.Errorf("usecase - UseCase - UserBalanceAccrual - u.txService.Rollback: %w", err)
 		}
 		u.logger.Error("usecase - UseCase - UserBalanceAccrual", "err", ErrUserAccrualNegativeBalance)
 		return ErrUserAccrualNegativeBalance
@@ -154,7 +152,7 @@ func (u *UserUseCase) GetBalance(ctx context.Context, id string) (user.User, err
 
 func (u *UserUseCase) CheckNegativeBalance(ctx context.Context, userDTO *user.User) error {
 	if userDTO.Balance < 0 {
-		u.logger.Error("usecase - UseCase - UserBalanceAccrual", ErrUserAccrualNegativeBalance)
+		u.logger.Error("usecase - UseCase - UserBalanceAccrual", "err", ErrUserAccrualNegativeBalance)
 		return ErrUserAccrualNegativeBalance
 	}
 	return nil

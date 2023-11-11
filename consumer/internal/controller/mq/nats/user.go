@@ -55,7 +55,7 @@ func NewUserSubscriber(nc *nats.Conn, js jetstream.JetStream, useCase *usecase.U
 
 func (u *UserSubscribe) publishMessage(ctx context.Context, userDTO *user.User, message string) error {
 	if u.js == nil {
-		u.logger.Error("nats - UserSubscribe - PublishMessage:", "err", ErrJsNil)
+		u.logger.Error("nats - UserSubscribe - PublishMessage", "err", ErrJsNil)
 		return ErrJsNil
 	}
 
@@ -66,7 +66,7 @@ func (u *UserSubscribe) publishMessage(ctx context.Context, userDTO *user.User, 
 	}
 	b, err := json.Marshal(mqData)
 	if err != nil {
-		u.logger.Error("nats - UserSubscribe - publishMessage - json.Marshal:", "err", err)
+		u.logger.Error("nats - UserSubscribe - publishMessage - json.Marshal", "err", err)
 	}
 
 	_, err = u.js.PublishAsync(Config.Topic, b)
@@ -136,7 +136,13 @@ func (u *UserSubscribe) subscribe(wg *sync.WaitGroup) {
 		if err != nil {
 			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)
 		}
-		u.logger.Info("Consumer", "=>Subject", msg.Subject, "ID", mqUser.ID, "Balance", mqUser.Balance, "Method", mqUser.Method)
+		//u.logger.Info("Consumer", "=>Subject", msg.Subject, "ID", mqUser.ID, "Balance", mqUser.Balance, "Method", mqUser.Method)
+
+		u.logger.Info("Consumer",
+			slog.String("Subject", msg.Subject),
+			slog.Uint64("ID", mqUser.ID),
+			slog.Float64("Balance", float64(mqUser.Balance)),
+			slog.String("Method", mqUser.Method))
 
 		ctx := context.Background()
 		switch mqUser.Method {

@@ -7,6 +7,7 @@
 + slog
 + Docker
 + NATS
++ mockery
 
 # Getting Started
 1. `git clone https://github.com/evgkhm/go-nats-pub-sub-restapi-postgresql`

@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/config"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/http"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/mq/nats"
 	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/logging"
 	"golang.org/x/net/context"
-	"log"
 	"time"
 )
 
@@ -40,6 +38,7 @@ func main() {
 
 	err = r.Run(":" + http.HTTP.Port)
 	if err != nil {
-		log.Fatal(fmt.Errorf("main - r.Run: %w", err))
+		logger.Error("main - r.Run", "err", err)
+		return
 	}
 }

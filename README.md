@@ -22,4 +22,4 @@
 | accrual_balance_user  |  POST  | Accrual balance user |
 
 # TODO
-Add tests, linter, metrics, graceful shutdown
+Add tests, linter, metrics, graceful shutdown, validate

@@ -10,7 +10,6 @@ import (
 	"golang.org/x/net/context"
 	"log/slog"
 	"runtime"
-	"strconv"
 	"sync"
 )
 
@@ -98,7 +97,7 @@ func (u *UserSubscribe) createUser(ctx context.Context, mqUser user.MqUser) { //
 func (u *UserSubscribe) getBalanceUser(ctx context.Context, mqUser user.MqUser) { //context
 	id := mqUser.ID
 
-	userDTO, err := u.useCase.GetBalance(ctx, strconv.FormatUint(id, 10))
+	userDTO, err := u.useCase.GetBalance(ctx, id)
 	if err != nil {
 		u.publishMessage(ctx, &userDTO, err.Error())
 		return

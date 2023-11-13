@@ -7,7 +7,6 @@ import (
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/repository/postgres"
 	"go-nats-pub-sub-restapi-postgresql/consumer/internal/transactions"
 	"log/slog"
-	"strconv"
 )
 
 var (
@@ -52,7 +51,7 @@ func (u *UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User
 
 	id := userDTO.ID
 	// Узнать текущий баланс
-	currBalance, err := u.userRepo.GetBalance(ctx, strconv.FormatUint(id, 10), tx)
+	currBalance, err := u.userRepo.GetBalance(ctx, id)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
@@ -73,7 +72,7 @@ func (u *UserUseCase) AccrualBalanceUser(ctx context.Context, userDTO *user.User
 		return err
 	}
 
-	err = u.userRepo.UserBalanceAccrual(ctx, tx, userDTO)
+	err = u.userRepo.UserBalanceAccrual(ctx, userDTO)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
@@ -103,7 +102,7 @@ func (u *UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error 
 		return err
 	}
 
-	err = u.userRepo.CreateUser(ctx, tx, userDTO)
+	err = u.userRepo.CreateUser(ctx, userDTO)
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
 		if errRollback != nil {
@@ -117,7 +116,7 @@ func (u *UserUseCase) CreateUser(ctx context.Context, userDTO *user.User) error 
 	return u.txService.Commit(tx)
 }
 
-func (u *UserUseCase) GetBalance(ctx context.Context, id string) (user.User, error) {
+func (u *UserUseCase) GetBalance(ctx context.Context, id uint64) (user.User, error) {
 	var userDTO user.User
 	tx, err := u.txService.NewTransaction()
 	if err != nil {
@@ -130,7 +129,7 @@ func (u *UserUseCase) GetBalance(ctx context.Context, id string) (user.User, err
 		return user.User{}, err
 	}
 
-	balance, err := u.userRepo.GetBalance(ctx, id, tx)
+	balance, err := u.userRepo.GetBalance(ctx, id)
 
 	if err != nil {
 		errRollback := u.txService.Rollback(tx)
@@ -143,7 +142,7 @@ func (u *UserUseCase) GetBalance(ctx context.Context, id string) (user.User, err
 	}
 
 	userDTO.Balance = balance
-	userDTO.ID, _ = strconv.ParseUint(id, 10, 64)
+	userDTO.ID = id
 
 	u.txService.Commit(tx)
 

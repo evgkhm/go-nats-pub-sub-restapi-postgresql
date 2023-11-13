@@ -29,6 +29,20 @@ func (_m *User) AccrualBalanceUser(ctx context.Context, userDTO *user.User) erro
 	return r0
 }
 
+// CalcNewBalance provides a mock function with given fields: ctx, userDTO, balance
+func (_m *User) CalcNewBalance(ctx context.Context, userDTO *user.User, balance float32) float32 {
+	ret := _m.Called(ctx, userDTO, balance)
+
+	var r0 float32
+	if rf, ok := ret.Get(0).(func(context.Context, *user.User, float32) float32); ok {
+		r0 = rf(ctx, userDTO, balance)
+	} else {
+		r0 = ret.Get(0).(float32)
+	}
+
+	return r0
+}
+
 // CheckNegativeBalance provides a mock function with given fields: ctx, userDTO
 func (_m *User) CheckNegativeBalance(ctx context.Context, userDTO *user.User) error {
 	ret := _m.Called(ctx, userDTO)
@@ -58,21 +72,21 @@ func (_m *User) CreateUser(ctx context.Context, userDTO *user.User) error {
 }
 
 // GetBalance provides a mock function with given fields: ctx, id
-func (_m *User) GetBalance(ctx context.Context, id string) (user.User, error) {
+func (_m *User) GetBalance(ctx context.Context, id uint64) (user.User, error) {
 	ret := _m.Called(ctx, id)
 
 	var r0 user.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (user.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) (user.User, error)); ok {
 		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) user.User); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) user.User); ok {
 		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(user.User)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
 		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)

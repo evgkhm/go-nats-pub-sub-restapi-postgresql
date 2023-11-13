@@ -15,7 +15,7 @@ type UseCase struct {
 //go:generate go run github.com/vektra/mockery/v2@v2.36.1 --name=User
 type User interface {
 	CreateUser(ctx context.Context, userDTO *user.User) error
-	GetBalance(ctx context.Context, id string) (user.User, error)
+	GetBalance(ctx context.Context, id uint64) (user.User, error)
 	AccrualBalanceUser(ctx context.Context, userDTO *user.User) error
 	CheckNegativeBalance(ctx context.Context, userDTO *user.User) error
 	CalcNewBalance(ctx context.Context, userDTO *user.User, balance float32) float32

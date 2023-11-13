@@ -7,8 +7,6 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	sqlx "github.com/jmoiron/sqlx"
-
 	user "go-nats-pub-sub-restapi-postgresql/consumer/internal/entity"
 )
 
@@ -17,13 +15,13 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// CreateUser provides a mock function with given fields: ctx, tx, userDTO
-func (_m *UserRepository) CreateUser(ctx context.Context, tx *sqlx.Tx, userDTO *user.User) error {
-	ret := _m.Called(ctx, tx, userDTO)
+// CreateUser provides a mock function with given fields: ctx, userDTO
+func (_m *UserRepository) CreateUser(ctx context.Context, userDTO *user.User) error {
+	ret := _m.Called(ctx, userDTO)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *sqlx.Tx, *user.User) error); ok {
-		r0 = rf(ctx, tx, userDTO)
+	if rf, ok := ret.Get(0).(func(context.Context, *user.User) error); ok {
+		r0 = rf(ctx, userDTO)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -31,23 +29,23 @@ func (_m *UserRepository) CreateUser(ctx context.Context, tx *sqlx.Tx, userDTO *
 	return r0
 }
 
-// GetBalance provides a mock function with given fields: ctx, id, tx
-func (_m *UserRepository) GetBalance(ctx context.Context, id string, tx *sqlx.Tx) (float32, error) {
-	ret := _m.Called(ctx, id, tx)
+// GetBalance provides a mock function with given fields: ctx, id
+func (_m *UserRepository) GetBalance(ctx context.Context, id uint64) (float32, error) {
+	ret := _m.Called(ctx, id)
 
 	var r0 float32
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *sqlx.Tx) (float32, error)); ok {
-		return rf(ctx, id, tx)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) (float32, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, *sqlx.Tx) float32); ok {
-		r0 = rf(ctx, id, tx)
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) float32); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(float32)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, *sqlx.Tx) error); ok {
-		r1 = rf(ctx, id, tx)
+	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -55,13 +53,13 @@ func (_m *UserRepository) GetBalance(ctx context.Context, id string, tx *sqlx.Tx
 	return r0, r1
 }
 
-// UserBalanceAccrual provides a mock function with given fields: ctx, tx, userDTO
-func (_m *UserRepository) UserBalanceAccrual(ctx context.Context, tx *sqlx.Tx, userDTO *user.User) error {
-	ret := _m.Called(ctx, tx, userDTO)
+// UserBalanceAccrual provides a mock function with given fields: ctx, userDTO
+func (_m *UserRepository) UserBalanceAccrual(ctx context.Context, userDTO *user.User) error {
+	ret := _m.Called(ctx, userDTO)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *sqlx.Tx, *user.User) error); ok {
-		r0 = rf(ctx, tx, userDTO)
+	if rf, ok := ret.Get(0).(func(context.Context, *user.User) error); ok {
+		r0 = rf(ctx, userDTO)
 	} else {
 		r0 = ret.Error(0)
 	}

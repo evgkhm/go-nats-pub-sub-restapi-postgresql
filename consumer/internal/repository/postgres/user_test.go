@@ -147,3 +147,74 @@ func TestRepo_GetBalance(t *testing.T) {
 		})
 	}
 }
+
+func TestRepo_CreateUser(t *testing.T) {
+	db, mock, err := sqlmock.Newx()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	r := NewUserRepository(db)
+
+	type args struct {
+		ctx     context.Context
+		userDTO *user.User
+	}
+	type mockBehavior func(args args, id int)
+	tests := []struct {
+		name    string
+		args    args
+		mock    mockBehavior
+		want    int
+		wantErr bool
+	}{
+		{
+			name: "Ok",
+			args: args{
+				ctx: context.Background(),
+				userDTO: &user.User{
+					ID:      1,
+					Balance: 10,
+				},
+			},
+			mock: func(args args, id int) {
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(id)
+				mock.ExpectQuery("INSERT INTO user_info").
+					WithArgs(1, 10.0).
+					WillReturnRows(rows)
+			},
+			want: 1,
+		},
+		{
+			name: "Duplicate error",
+			args: args{
+				ctx: context.Background(),
+				userDTO: &user.User{
+					ID:      1,
+					Balance: 10,
+				},
+			},
+			mock: func(args args, id int) {
+				rows := sqlmock.NewRows([]string{"id"}).AddRow(id).RowError(0, ErrUserAlreadyExist)
+				mock.ExpectQuery("INSERT INTO user_info").
+					WillReturnRows(rows)
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock(tt.args, tt.want)
+			err := r.CreateUser(tt.args.ctx, tt.args.userDTO)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}

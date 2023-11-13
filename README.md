@@ -2,12 +2,11 @@
 
 # Stack
 + REST API
-+ PostgreSQL
-+ sqlx
++ PostgreSQL, sqlx
 + slog
 + Docker
 + NATS
-+ mockery
++ mockery, go-sqlxmock, testify
 
 # Getting Started
 1. `git clone https://github.com/evgkhm/go-nats-pub-sub-restapi-postgresql`

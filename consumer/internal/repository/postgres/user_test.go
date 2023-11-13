@@ -72,5 +72,78 @@ func TestRepo_UserBalanceAccrual(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+}
 
+func TestRepo_GetBalance(t *testing.T) {
+	db, mock, err := sqlmock.Newx()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	defer db.Close()
+
+	r := NewUserRepository(db)
+
+	type args struct {
+		ctx     context.Context
+		userDTO *user.User
+	}
+	tests := []struct {
+		name    string
+		mock    func()
+		args    args
+		want    float32
+		wantErr bool
+	}{
+		{
+			name: "Ok",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"balance"}).
+					AddRow(10.0)
+				mock.ExpectQuery("SELECT (.+) FROM user_info WHERE (.+)").
+					WithArgs(1).
+					WillReturnRows(rows)
+			},
+			args: args{
+				ctx: context.Background(),
+				userDTO: &user.User{
+					ID:      1,
+					Balance: 10,
+				},
+			},
+			want: 10,
+		},
+		{
+			name: "Not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"balance"})
+
+				mock.ExpectQuery("SELECT (.+) FROM user_info WHERE (.+)").
+					WithArgs(404).
+					WillReturnRows(rows)
+			},
+			args: args{
+				ctx: context.Background(),
+				userDTO: &user.User{
+					ID:      404,
+					Balance: 10,
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			got, err := r.GetBalance(tt.args.ctx, tt.args.userDTO.ID)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
 }

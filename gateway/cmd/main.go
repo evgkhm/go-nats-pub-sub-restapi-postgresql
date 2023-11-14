@@ -24,8 +24,9 @@ func main() {
 
 	logger.Info("Config", "http", http.HTTP, "nats", nats.Config)
 
-	nc, js, err := nats.New(nats.Config, logger)
-	if err != nil {
+	nc, js, natsErr := nats.New(nats.Config, logger)
+	if natsErr != nil {
+		logger.Error("main - nats.New", "err", natsErr)
 		return
 	}
 	logger.Info("nats created and connected")
@@ -34,11 +35,15 @@ func main() {
 	natsSubscriber.Run(ctx)
 
 	handlers := http.New(js, natsSubscriber, logger)
-	r := handlers.InitRoutes()
+	r, handlersErr := handlers.InitRoutes()
+	if handlersErr != nil {
+		logger.Error("main - handlers.InitRoutes", "err", handlersErr)
+		return
+	}
 
-	err = r.Run(":" + http.HTTP.Port)
-	if err != nil {
-		logger.Error("main - r.Run", "err", err)
+	runGinErr := r.Run(":" + http.HTTP.Port)
+	if runGinErr != nil {
+		logger.Error("main - r.Run", "err", runGinErr)
 		return
 	}
 }

@@ -36,7 +36,7 @@ type Subscriber struct {
 type UserJetStream interface {
 	Run(ctx context.Context)
 	subscribe(ctx context.Context, wg *sync.WaitGroup)
-	PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, message string) error
+	PublishMessage(js jetstream.JetStream, userDTO interface{}, topic string) error
 }
 
 func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, logger *slog.Logger) *Subscriber {
@@ -47,7 +47,7 @@ func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, logger *slog.Logger) *
 
 func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 	u.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
-		var mqUser user.MqUser
+		var mqUser user.UserWithBalance
 		err := json.Unmarshal(msg.Data, &mqUser)
 		if err != nil {
 			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)
@@ -61,18 +61,13 @@ func (u *UserSubscribe) subscribe(ctx context.Context, wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-func (u *UserSubscribe) PublishMessage(js jetstream.JetStream, userDTO *user.User, topic string, message string) error {
+func (u *UserSubscribe) PublishMessage(js jetstream.JetStream, userDTO interface{}, topic string) error {
 	if js == nil {
 		u.logger.Error("nats - UserSubscribe - PublishMessage:", "err", ErrJsNil)
 		return ErrJsNil
 	}
 
-	mqData := user.MqUser{
-		ID:      userDTO.ID,
-		Balance: userDTO.Balance,
-		Method:  message,
-	}
-	b, err := json.Marshal(mqData)
+	b, err := json.Marshal(userDTO)
 	if err != nil {
 		u.logger.Error("nats - UserSubscribe - PublishMessage - json.Marshal:", "err", err)
 		return err

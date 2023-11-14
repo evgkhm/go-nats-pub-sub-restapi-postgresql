@@ -7,6 +7,5 @@ nats:
   #url: "localhost:4222" #for local
   url: "nats://nats:4222" #for docker
   name: "EVENTS"
-  #subjects: "events" # subjects: "events.>"
   subjects.topic: "events.users_info"
 ...

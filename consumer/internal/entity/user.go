@@ -5,8 +5,8 @@ type User struct {
 	Balance float32 `json:"balance"`
 }
 
-type MqUser struct {
+type UserWithBalance struct {
 	ID      uint64  `json:"id"`
 	Balance float32 `json:"balance"`
-	Method  string  `json:"result"`
+	Method  string  `json:"method"`
 }

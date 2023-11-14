@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"go-nats-pub-sub-restapi-postgresql/gateway/internal/controller/mq/nats"
 	user "go-nats-pub-sub-restapi-postgresql/gateway/internal/entity"
+	"go-nats-pub-sub-restapi-postgresql/gateway/pkg/validator"
 	"net/http"
 	"strconv"
 )
@@ -15,15 +16,23 @@ var (
 	ErrEmptyCodeParam = errors.New("Empty code param")
 )
 
-func (h Handler) createUser(c *gin.Context) {
-	var userDTO *user.User
+func (h *Handler) createUser(c *gin.Context) {
+	var userDTO *user.UserWithBalance
 	err := c.BindJSON(&userDTO)
 	if err != nil {
 		h.logger.Error("Error while bind userDTO to JSON", "err", ErrBadRequest)
 		c.JSON(http.StatusBadRequest, ErrBadRequest.Error())
 		return
 	}
-	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Create user")
+	userDTO.Method = "Create user"
+
+	if err = h.Validate(validator.StructValidator(userDTO)); err != nil {
+		h.logger.Error("Error while validate userDTO", "err", err)
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic)
 	if err != nil {
 		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
@@ -33,23 +42,21 @@ func (h Handler) createUser(c *gin.Context) {
 	c.JSON(http.StatusOK, "Ok")
 }
 
-func (h Handler) getBalanceUserByID(c *gin.Context) {
+func (h *Handler) getBalanceUserByID(c *gin.Context) {
 	var err error
 	id := c.Param("id")
-	if id == "" {
-		h.logger.Error("Error while parse id", "err", ErrEmptyCodeParam)
-		c.JSON(http.StatusBadRequest, ErrEmptyCodeParam.Error())
-	}
 
 	var userDTO user.User
 	userDTO.ID, err = strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		h.logger.Error("Error while parse userDTO.ID", "err", ErrInternalServer)
-		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
+	userDTO.Method = "Get user balance"
+
+	if err = h.Validate(validator.StructValidator(userDTO)); err != nil {
+		h.logger.Error("Error while validate userDTO", "err", err)
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.natsSubscriber.PublishMessage(h.js, &userDTO, nats.Config.Topic, "Get user balance")
+	err = h.natsSubscriber.PublishMessage(h.js, &userDTO, nats.Config.Topic)
 	if err != nil {
 		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())
@@ -59,16 +66,23 @@ func (h Handler) getBalanceUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, "Ok")
 }
 
-func (h Handler) accrualBalanceUser(c *gin.Context) {
-	var userDTO *user.User
+func (h *Handler) accrualBalanceUser(c *gin.Context) {
+	var userDTO *user.UserWithBalance
 	err := c.BindJSON(&userDTO)
 	if err != nil {
 		h.logger.Error("Error while bind userDTO to JSON", "err", ErrBadRequest)
 		c.JSON(http.StatusBadRequest, "Bad request")
 		return
 	}
+	userDTO.Method = "Accrual user balance"
 
-	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic, "Accrual user balance")
+	if err = h.Validate(validator.StructValidator(userDTO)); err != nil {
+		h.logger.Error("Error while validate userDTO", "err", err)
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = h.natsSubscriber.PublishMessage(h.js, userDTO, nats.Config.Topic)
 	if err != nil {
 		h.logger.Error("Error while publish message to nats", "err", ErrInternalServer)
 		c.JSON(http.StatusInternalServerError, ErrInternalServer.Error())

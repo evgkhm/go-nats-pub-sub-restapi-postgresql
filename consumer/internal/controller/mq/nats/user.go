@@ -30,11 +30,11 @@ type Subscriber struct {
 
 type UserJetStream interface {
 	Run()
-	createUser(ctx context.Context, mqUser user.MqUser)
+	createUser(ctx context.Context, mqUser user.UserWithBalance)
 	subscribe(wg *sync.WaitGroup)
 	publishMessage(ctx context.Context, userDTO *user.User, message string) error
-	getBalanceUser(ctx context.Context, mqUser user.MqUser)
-	accrualBalanceUser(ctx context.Context, mqUser user.MqUser)
+	getBalanceUser(ctx context.Context, mqUser user.UserWithBalance)
+	accrualBalanceUser(ctx context.Context, mqUser user.UserWithBalance)
 }
 
 func NewSubscriber(nc *nats.Conn, js jetstream.JetStream, useCase *usecase.UseCase, logger *slog.Logger) *Subscriber {
@@ -58,7 +58,7 @@ func (u *UserSubscribe) publishMessage(ctx context.Context, userDTO *user.User, 
 		return ErrJsNil
 	}
 
-	mqData := user.MqUser{
+	mqData := user.UserWithBalance{
 		ID:      userDTO.ID,
 		Balance: userDTO.Balance,
 		Method:  message,
@@ -76,7 +76,7 @@ func (u *UserSubscribe) publishMessage(ctx context.Context, userDTO *user.User, 
 	return nil
 }
 
-func (u *UserSubscribe) createUser(ctx context.Context, mqUser user.MqUser) { //context
+func (u *UserSubscribe) createUser(ctx context.Context, mqUser user.UserWithBalance) { //context
 	userDTO := &user.User{
 		ID:      mqUser.ID,
 		Balance: mqUser.Balance,
@@ -94,7 +94,7 @@ func (u *UserSubscribe) createUser(ctx context.Context, mqUser user.MqUser) { //
 	}
 }
 
-func (u *UserSubscribe) getBalanceUser(ctx context.Context, mqUser user.MqUser) { //context
+func (u *UserSubscribe) getBalanceUser(ctx context.Context, mqUser user.UserWithBalance) { //context
 	id := mqUser.ID
 
 	userDTO, err := u.useCase.GetBalance(ctx, id)
@@ -110,7 +110,7 @@ func (u *UserSubscribe) getBalanceUser(ctx context.Context, mqUser user.MqUser) 
 	}
 }
 
-func (u *UserSubscribe) accrualBalanceUser(ctx context.Context, mqUser user.MqUser) {
+func (u *UserSubscribe) accrualBalanceUser(ctx context.Context, mqUser user.UserWithBalance) {
 	userDTO := &user.User{
 		ID:      mqUser.ID,
 		Balance: mqUser.Balance,
@@ -130,7 +130,7 @@ func (u *UserSubscribe) accrualBalanceUser(ctx context.Context, mqUser user.MqUs
 
 func (u *UserSubscribe) subscribe(wg *sync.WaitGroup) {
 	u.nc.Subscribe(Config.Topic, func(msg *nats.Msg) {
-		var mqUser user.MqUser
+		var mqUser user.UserWithBalance
 		err := json.Unmarshal(msg.Data, &mqUser)
 		if err != nil {
 			u.logger.Error("nats - UserSubscribe - subscribe - json.Unmarshal:", "err", err)

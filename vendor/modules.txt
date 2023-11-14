@@ -1,6 +1,5 @@
 # github.com/DATA-DOG/go-sqlmock v1.5.0
 ## explicit
-github.com/DATA-DOG/go-sqlmock
 # github.com/bytedance/sonic v1.9.1
 ## explicit; go 1.15
 github.com/bytedance/sonic
@@ -56,7 +55,7 @@ github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.18.1
 ## explicit; go 1.18
 github.com/go-playground/universal-translator
-# github.com/go-playground/validator/v10 v10.14.0
+# github.com/go-playground/validator/v10 v10.16.0
 ## explicit; go 1.18
 github.com/go-playground/validator/v10
 # github.com/goccy/go-json v0.10.2
@@ -218,7 +217,6 @@ github.com/zhashkevych/go-sqlxmock
 go.uber.org/atomic
 # go.uber.org/mock v0.3.0
 ## explicit; go 1.20
-go.uber.org/mock/gomock
 # go.uber.org/multierr v1.9.0
 ## explicit; go 1.19
 go.uber.org/multierr

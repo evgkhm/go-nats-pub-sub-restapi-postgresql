@@ -1,12 +1,12 @@
 package user
 
 type User struct {
-	ID      uint64  `json:"id"`
-	Balance float32 `json:"balance"`
+	ID     uint64 `json:"id" validate:"required"`
+	Method string `json:"method" validate:"required"`
 }
 
-type MqUser struct {
-	ID      uint64  `json:"id"`
-	Balance float32 `json:"balance"`
-	Method  string  `json:"result"`
+type UserWithBalance struct {
+	ID      uint64  `json:"id" validate:"required"`
+	Balance float32 `json:"balance" validate:"required"`
+	Method  string  `json:"method" validate:"required"`
 }

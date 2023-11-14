@@ -2,11 +2,12 @@
 
 # Stack
 + REST API
-+ PostgreSQL, sqlx
-+ slog
++ Db: PostgreSQL. Driver: sqlx
++ Logger: slog
 + Docker
-+ NATS
-+ mockery, go-sqlxmock, testify
++ Mq: NATS
++ Test: mockery, go-sqlxmock, testify
++ validator
 
 # Getting Started
 1. `git clone https://github.com/evgkhm/go-nats-pub-sub-restapi-postgresql`
@@ -21,4 +22,4 @@
 | accrual_balance_user  |  POST  | Accrual balance user |
 
 # TODO
-Add tests, linter, metrics, graceful shutdown, validate
+Add linter, metrics, graceful shutdown
